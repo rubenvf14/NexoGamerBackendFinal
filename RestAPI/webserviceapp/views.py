@@ -434,3 +434,27 @@ def login(request):
             return JsonResponse({'error': 'Usuario no encontrado'}, status=404)
     else:
         return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+@csrf_exempt
+def logout(request, usuario_id):
+    # Comprobación de token. El error_response guarda la información que le proporciona el return del verify_token
+	error_response, payload = verify_token(request)
+	#Si existe el error se visualizará por pantalla
+	if error_response:
+		return error_response
+
+	#Si el método introducido no es un PATCH, saltará el error
+	if request.method != 'PATCH':
+		return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+	try:
+		#Cogemos todos los objetos del modelo Users que coincidan con el filtrado introducido
+		user = Users.objects.get(pk=usuario_id)
+		user.sessiontoken = None  # o user.session_token =
+		#Guardamos el objeto sessiontoken con el valor Nulo y luego guardamos los cambios con user.save()
+		user.save()
+		return JsonResponse({'message': 'Sesión cerrada exitosamente'}, status=200)
+	except Users.DoesNotExist:
+		return JsonResponse({'error': 'Faltan parametros o son incorrectos'}, status=400)
+	except Exception as e:
+		return JsonResponse({'error':'Unauthorized'},status=401)
