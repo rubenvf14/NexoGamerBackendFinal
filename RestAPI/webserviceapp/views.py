@@ -253,3 +253,40 @@ def devolver_juegos_PorAño(request):
                 return JsonResponse({'error': 'Fecha del juego no proporcionada en la URL'}, status=400)
         else:
             return JsonResponse({'error': 'The year must be between 2000 and 2024'}, status=400)
+
+def devolver_juegos_favoritos(request, usuario_id):
+    if request.method == 'GET':
+        if usuario_id is None: 
+            return JsonResponse({'error': 'no id selected'}, status=405)
+        
+        # Filtra los favoritos del usuario actual
+        favoritos = Favoritos.objects.filter(userid=usuario_id, esfavorito = True)
+        
+        # Lista para almacenar los resultados
+        lista_favorito = []
+        
+        # Itera sobre los favoritos y obtén las películas asociadas
+        for favorito in favoritos:
+            juego = favorito.juegoid
+            diccionario = {
+                'id': juego.id,
+                'nombre': juego.nombre,
+                'genero': juego.genero,
+                'fechaSalida': juego.fechasalida,
+                'consola': juego.consola,
+                'descripcion': juego.descripcion,
+                'urlImagen': juego.urlimagen,
+                'compañia': juego.compañia,
+                'valoracion': juego.valoracion,
+                'precio': juego.precio,
+                'rebaja': juego.rebaja,
+                'comentarioId': juego.comentarioid.id
+            }
+            lista_favorito.append(diccionario)
+        
+        # Devuelve la respuesta en formato JSON
+        return JsonResponse(lista_favorito, safe=False)
+
+    # Si el método no es GET, devuelve un error de método no permitido
+    return JsonResponse({'error': 'Method not allowed'}, status=405)
+
