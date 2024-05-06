@@ -378,4 +378,59 @@ def update_user(request, usuario_id):
     else:
         return JsonResponse({'error': 'Método no permitido'}, status=405)
 
+SECRET_KEY = 'claveTremendamentesegura.'
 
+def crear_token(usuario_id):
+	payload = {
+		'id': usuario_id,
+		'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1),
+		'iat': datetime.datetime.utcnow()
+	}
+	token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
+	return token
+
+"""
+    Verifica un token JWT incluido en la solicitud HTTP.
+
+    Returns:
+      		Una tupla con dos elementos:
+            - JsonResponse o None: Si hay un error, devuelve una respuesta JSON con un mensaje de error.
+            - dict or None: Si el token es válido, devuelve el payload decodificado.
+"""
+
+def verify_token(request):
+	token = request.META.get('HTTP_AUTHORIZATION',None)
+	if not token:
+		return JsonResponse({'message':'Token is missing!'}, status=401), None
+
+	try:
+		if token.startswith('Bearer '):
+			token = token.split(' ')[1]
+		payload = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
+		return None, payload
+	except jwt.ExpiredSignatureError:
+		return JsonResponse({'message':'Token has expired'}, status=401), None
+	except jwt.InvalidTokenError:
+		return JsonResponse({'message':'Invalid token!'}, status=401), None
+
+# login
+# cuando inicias sesion la primera vez lo hace perfectamente y cuando cierras tambien lo hace correctamente pero cuando inicias sesion por segunda vez te sale el error de contraseña incorrecta aún poniendo la contraseña bien
+
+@csrf_exempt
+def login(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            user = Users.objects.get(nombre=data['username'])
+            if check_password(data['password'], user.contraseña):
+                token = crear_token(user.id)
+                sessiontoken=crear_token(user.id)
+                user.sessiontoken=sessiontoken
+                user.save()
+                return JsonResponse({'iduser': user.id, 'token': token}, status=200)
+            else:
+                return JsonResponse({'error': 'Contraseña incorrecta'}, status=401)
+        except Users.DoesNotExist:
+            return JsonResponse({'error': 'Usuario no encontrado'}, status=404)
+    else:
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
