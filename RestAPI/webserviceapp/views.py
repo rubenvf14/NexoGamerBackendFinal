@@ -326,4 +326,22 @@ def register(request):
 		except Exception as e:
 			return JsonResponse({'error':str(e)}, status=400)
 
+@csrf_exempt
+def del_user(request, usuario_id):
+    if request.method == 'DELETE':
+        try:
+            # Verificar si el usuario existe
+            usuario = Users.objects.get(id=usuario_id)
+            
+            # Eliminar el usuario
+            usuario.delete()
+            
+            return JsonResponse({'message': 'Usuario eliminado exitosamente'}, status=200)
+        except Users.DoesNotExist:
+            return JsonResponse({'error': 'El usuario no existe'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+    else:
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+
 
