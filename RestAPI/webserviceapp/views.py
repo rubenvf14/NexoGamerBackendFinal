@@ -344,4 +344,38 @@ def del_user(request, usuario_id):
     else:
         return JsonResponse({'error': 'Método no permitido'}, status=405)
 
+@csrf_exempt
+def update_user(request, usuario_id):
+    if request.method == 'PUT':
+        try:
+            # Obtener el usuario
+            usuario = Users.objects.get(id=usuario_id)
+            
+            # Decodificar y obtener los datos de la solicitud
+            data = json.loads(request.body.decode('utf-8'))
+
+            # Actualizar los campos del usuario si existen en los datos
+            if 'nombre' in data:
+                usuario.nombre = data['nombre']
+            if 'apellidos' in data:
+                usuario.apellidos = data['apellidos']
+            if 'contraseña' in data:
+                # Hashear la contraseña antes de guardarla
+                usuario.contraseña = make_password(data['contraseña'])
+            if 'telefono' in data:
+                usuario.telefono = data['telefono']
+            if 'email' in data:
+                usuario.email = data['email']
+
+            # Guardar los cambios
+            usuario.save()
+
+            return JsonResponse({'message': 'Usuario actualizado exitosamente'}, status=200)
+        except Users.DoesNotExist:
+            return JsonResponse({'error': 'El usuario no existe'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+    else:
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+
 
