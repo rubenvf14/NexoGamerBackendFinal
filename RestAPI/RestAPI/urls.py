@@ -26,4 +26,5 @@ urlpatterns = [
     path('plataformasJuegos', views.devolver_juegos_PorNombrePlataforma),
     path('juegosGenero', views.devolver_juegos_PorGenero),
     path('juegosNombre', views.devolver_juegos_PorNombre),
+    path('juegosAño', views.devolver_juegos_PorAño),
 ]
