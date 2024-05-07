@@ -119,7 +119,11 @@ deberás cambiarle el renvío de puertos en la configuración de la máquina vir
 
 
 
-https://github.com/rubenvf14/NexoGamerFrontendFinal/assets/145007165/fb4cdf64-6265-4cf6-83b4-5955dca214ab
+
+
+https://github.com/rubenvf14/NexoGamerFrontendFinal/assets/145007165/ea5e9bc7-108a-4b14-b498-4f24c1758595
+
+
 
 
 
@@ -134,7 +138,7 @@ https://github.com/rubenvf14/NexoGamerFrontendFinal/assets/145007165/fb4cdf64-62
 <div>
   
 
-https://github.com/rubenvf14/NexoGamerFrontendFinal/assets/145007165/668f81be-f080-4017-ba63-2f71e5430cea
+https://github.com/rubenvf14/NexoGamerFrontendFinal/assets/145007165/fb4cdf64-6265-4cf6-83b4-5955dca214ab
 
 
 </div>
