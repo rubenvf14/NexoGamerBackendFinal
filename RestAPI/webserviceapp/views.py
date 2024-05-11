@@ -495,6 +495,7 @@ def obtener_comentarios_juegos(request):
     for juego in juegos_con_comentarios:
         if juego.comentarioid:  # Verificar si el juego tiene un comentario asociado
             comentarios_por_juego[juego.nombre] = {
+                 'juegoNombre': juego.nombre,
                 'comentario': juego.comentarioid.comentario,
                 'url_imagen': juego.urlimagen
             }
