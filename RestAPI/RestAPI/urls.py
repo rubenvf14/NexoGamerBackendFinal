@@ -34,4 +34,5 @@ urlpatterns = [
     path('login', views.login),
     path('logout/<int:usuario_id>', views.logout),
     path('put_favoritos/<int:favorito_id>', views.put_favoritos),
+    path('comentariosJuegos', views.obtener_comentarios_juegos),
 ]

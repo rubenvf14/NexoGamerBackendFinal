@@ -421,8 +421,8 @@ def login(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body.decode('utf-8'))
-            user = Users.objects.get(nombre=data['username'])
-            if check_password(data['password'], user.contraseña):
+            user = Users.objects.get(nombre=data['nombre'])
+            if check_password(data['contraseña'], user.contraseña):
                 token = crear_token(user.id)
                 sessiontoken=crear_token(user.id)
                 user.sessiontoken=sessiontoken
@@ -483,3 +483,20 @@ def put_favoritos(request, favorito_id):
             return JsonResponse({'error': str(e)}, status=400)
     else:
         return JsonResponse({'error': 'Method Not Allowed'}, status=405)
+
+def obtener_comentarios_juegos(request):
+    # Obtener todos los juegos con sus comentarios asociados
+    juegos_con_comentarios = Juegos.objects.select_related('comentarioid').all()
+
+    # Crear un diccionario para almacenar los comentarios y las URL de las imágenes de cada juego
+    comentarios_por_juego = {}
+
+    # Iterar sobre cada juego y obtener su comentario asociado
+    for juego in juegos_con_comentarios:
+        if juego.comentarioid:  # Verificar si el juego tiene un comentario asociado
+            comentarios_por_juego[juego.nombre] = {
+                'comentario': juego.comentarioid.comentario,
+                'url_imagen': juego.urlimagen
+            }
+
+    return JsonResponse(comentarios_por_juego)
