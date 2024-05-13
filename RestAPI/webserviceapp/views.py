@@ -1,4 +1,5 @@
 import datetime
+from django.core import serializers
 from django.db.models import Q
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
@@ -491,13 +492,13 @@ def obtener_comentarios_juegos(request):
     # Crear una lista para almacenar los comentarios de cada juego
     comentarios_por_juego = []
 
-    # Iterar sobre cada juego y obtener su comentario asociado
+    # Iterar sobre cada juego y obtener sus comentarios asociados
     for juego in juegos_con_comentarios:
-        if juego.comentarioid:  # Verificar si el juego tiene un comentario asociado
+        for comentario in juego.comentariosjuegos_set.all():
             comentarios_por_juego.append({
                 'juegoNombre': juego.nombre,
-                'comentario': juego.comentarioid.comentario
+                'comentario': comentario.comentario
             })
 
+    # Devolver la lista de comentarios como respuesta JSON
     return JsonResponse(comentarios_por_juego, safe=False)
-
