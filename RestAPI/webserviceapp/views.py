@@ -30,10 +30,7 @@ def devolver_usuarios(request):
                 'apellidos': usuario.apellidos,
                 'contraseña': usuario.contraseña,
                 'telefono': usuario.telefono,
-                'email': usuario.email,
-                'juegoFavoritoId': usuario.juegofavoritoid.id,
-                'comentarioJuegoId': usuario.comentariojuegoid.id,
-                'sessionToken': usuario.sessiontoken
+                'email': usuario.email
             }
             array.append(diccionario)
         return JsonResponse(array, safe = False)
