@@ -167,7 +167,7 @@ def devolver_juegos_PorNombre(request):
         if juego_name:
             try:
                 #Filtramos la tabla por el nombre del juego que haya introducido el usuario o buscamos el alias del juego
-                juegos = Juegos.objects.filter(Q(nombre__startswith = juego_name) | Q(alias__icontains=juego_name.lower()))
+                juegos = Juegos.objects.filter(Q(nombre__icontains = juego_name) | Q(alias__icontains=juego_name.lower()))
 
                 #Creación del array
                 array = []
