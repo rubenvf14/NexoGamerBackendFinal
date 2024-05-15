@@ -11,7 +11,7 @@ from django.db import models
 class Comentariosjuegos(models.Model):
     comentario = models.CharField(max_length=500, blank=True, null=True)
     juegoid = models.ForeignKey('Juegos', models.DO_NOTHING, db_column='juegoId', blank=True, null=True)  # Field name made lowercase.
-    userid = models.IntegerField(db_column='userId', blank=True, null=True)  # Field name made lowercase.
+    userid = models.ForeignKey('Users', models.DO_NOTHING, db_column='userId', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
