@@ -122,7 +122,7 @@ def devolver_juegos_PorGenero(request):
           if genero_name:
                try:
                     #Filtramos la tabla por el género que haya introducido el usuario
-                    juegos = Juegos.objects.filter(genero__startswith = genero_name)
+                    juegos = Juegos.objects.filter(genero__icontains = genero_name)
 
                     #Creación del array
                     array = []
