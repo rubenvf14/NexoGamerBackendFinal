@@ -77,7 +77,7 @@ def devolver_juegos_PorNombrePlataforma(request):
 
             try:
                 # Obtenemos todos los juegos cuyas plataformas comiencen con el nombre proporcionado
-                juegos = Juegos.objects.filter(plataformasjuegos__nombre__startswith=plataforma_name)
+                juegos = Juegos.objects.filter(plataformasjuegos__nombre__icontains=plataforma_name)
 
                 # Creación del array para almacenar los datos de los juegos
                 array = []
