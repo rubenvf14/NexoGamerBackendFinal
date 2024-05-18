@@ -8,7 +8,6 @@ from .models import Users
 from .models import Juegos
 from .models import Comentariosjuegos
 from .models import Favoritos
-from .models import Plataformasjuegos
 import json, jwt
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import make_password
@@ -187,7 +186,8 @@ def devolver_juegos_PorNombre(request):
                         'valoracion': juego.valoracion,
                         'precio': juego.precio,
                         'rebaja': juego.rebaja,
-                        'comentarioId': juego.comentarioid.id
+                        'comentarioId': juego.comentarioid.id,
+                        'plataforma': juego.plataforma
                     }
 
                     # Verificar si el juego tiene un alias
@@ -502,3 +502,26 @@ def obtener_comentarios_juegos(request):
 
     # Devolver la lista de comentarios como respuesta JSON
     return JsonResponse(comentarios_por_juego, safe=False)
+
+@csrf_exempt
+def agregarComentario(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            comentario = data['comentario']
+            juego_id = data['juegoId']
+            user_id = data['userId']
+            
+            # Crear un nuevo comentario en la base de datos
+            nuevo_comentario = Comentariosjuegos(
+                comentario=comentario,
+                juegoid_id=juego_id,
+                userid_id=user_id
+            )
+            nuevo_comentario.save()
+            
+            return JsonResponse({'message': 'Comentario agregado exitosamente'}, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    else:
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
