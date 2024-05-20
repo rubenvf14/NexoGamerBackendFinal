@@ -1,4 +1,5 @@
-import datetime
+from datetime import datetime, timedelta
+from django.conf import settings
 from django.db.models import Q
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
@@ -367,4 +368,30 @@ def update_user(request, usuario_id):
     else:
         return JsonResponse({'error': 'Método no permitido'}, status=405)
 
+def crear_token(user_id):
+    payload = {
+        'user_id': user_id,
+        'exp': datetime.utcnow() + timedelta(hours=24),
+        'iat': datetime.utcnow()
+    }
+    token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
+    return token
 
+@csrf_exempt
+def login(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            user = Users.objects.get(nombre=data['username'])
+            if check_password(data['password'], user.contraseña):
+                token = crear_token(user.id)
+                sessiontoken = crear_token(user.id)
+                user.sessiontoken = sessiontoken
+                user.save()
+                return JsonResponse({'iduser': user.id, 'token': token}, status=200)
+            else:
+                return JsonResponse({'error': 'Contraseña incorrecta'}, status=401)
+        except Users.DoesNotExist:
+            return JsonResponse({'error': 'Usuario no encontrado'}, status=404)
+    else:
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
