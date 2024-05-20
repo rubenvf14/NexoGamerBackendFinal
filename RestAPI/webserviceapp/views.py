@@ -1,3 +1,5 @@
+import datetime
+from django.core import serializers
 from datetime import datetime, timedelta
 from django.conf import settings
 from django.db.models import Q
@@ -8,7 +10,6 @@ from .models import Users
 from .models import Juegos
 from .models import Comentariosjuegos
 from .models import Favoritos
-from .models import Plataformasjuegos
 import json, jwt
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import make_password
@@ -76,6 +77,7 @@ def devolver_juegos_PorNombrePlataforma(request):
             try:
                 # Obtenemos todos los juegos cuyas plataformas comiencen con el nombre proporcionado
                 juegos = Juegos.objects.filter(plataformasjuegos__nombre__icontains=plataforma_name)
+                juegos = Juegos.objects.filter(plataformasjuegos__nombre__icontains=plataforma_name)
 
                 # Creación del array para almacenar los datos de los juegos
                 array = []
@@ -120,6 +122,7 @@ def devolver_juegos_PorGenero(request):
           if genero_name:
                try:
                     #Filtramos la tabla por el género que haya introducido el usuario
+                    juegos = Juegos.objects.filter(genero__icontains = genero_name)
                     juegos = Juegos.objects.filter(genero__icontains = genero_name)
 
                     #Creación del array
@@ -166,6 +169,7 @@ def devolver_juegos_PorNombre(request):
             try:
                 #Filtramos la tabla por el nombre del juego que haya introducido el usuario o buscamos el alias del juego
                 juegos = Juegos.objects.filter(Q(nombre__icontains = juego_name) | Q(alias__icontains=juego_name.lower()))
+                juegos = Juegos.objects.filter(Q(nombre__icontains = juego_name) | Q(alias__icontains=juego_name.lower()))
 
                 #Creación del array
                 array = []
@@ -184,7 +188,8 @@ def devolver_juegos_PorNombre(request):
                         'valoracion': juego.valoracion,
                         'precio': juego.precio,
                         'rebaja': juego.rebaja,
-                        'comentarioId': juego.comentarioid.id
+                        'comentarioId': juego.comentarioid.id,
+                        'plataforma': juego.plataforma
                     }
 
                     # Verificar si el juego tiene un alias
@@ -398,11 +403,6 @@ def login(request):
 
 @csrf_exempt
 def logout(request, usuario_id):
-    # Comprobación de token. El error_response guarda la información que le proporciona el return del verify_token
-	error_response, payload = verify_token(request)
-	#Si existe el error se visualizará por pantalla
-	if error_response:
-		return error_response
 
 	#Si el método introducido no es un PATCH, saltará el error
 	if request.method != 'PATCH':
@@ -444,3 +444,44 @@ def put_favoritos(request, favorito_id):
             return JsonResponse({'error': str(e)}, status=400)
     else:
         return JsonResponse({'error': 'Method Not Allowed'}, status=405)
+
+def obtener_comentarios_juegos(request):
+    # Obtener todos los juegos con sus comentarios asociados
+    juegos_con_comentarios = Juegos.objects.select_related('comentarioid').all()
+
+    # Crear una lista para almacenar los comentarios de cada juego
+    comentarios_por_juego = []
+
+    # Iterar sobre cada juego y obtener sus comentarios asociados
+    for juego in juegos_con_comentarios:
+        for comentario in juego.comentariosjuegos_set.all():
+            comentarios_por_juego.append({
+                'juegoNombre': juego.nombre,
+                'comentario': comentario.comentario
+            })
+
+    # Devolver la lista de comentarios como respuesta JSON
+    return JsonResponse(comentarios_por_juego, safe=False)
+
+@csrf_exempt
+def agregarComentario(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            comentario = data['comentario']
+            juego_id = data['juegoId']
+            user_id = data['userId']
+            
+            # Crear un nuevo comentario en la base de datos
+            nuevo_comentario = Comentariosjuegos(
+                comentario=comentario,
+                juegoid_id=juego_id,
+                userid_id=user_id
+            )
+            nuevo_comentario.save()
+            
+            return JsonResponse({'message': 'Comentario agregado exitosamente'}, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    else:
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
