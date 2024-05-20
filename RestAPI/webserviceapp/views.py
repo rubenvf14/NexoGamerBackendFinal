@@ -61,3 +61,51 @@ def devolver_juegos(request):
         return JsonResponse(array, safe = False)
     else:
         return JsonResponse("Method not allowed")
+
+def devolver_juegos_PorNombrePlataforma(request):
+    if request.method == 'GET':
+        # Obtenemos el nombre de la plataforma desde la URL
+        plataforma_name = request.GET.get('nombre')
+
+        # Si se proporciona el nombre de la plataforma
+        if plataforma_name:
+            # Convertimos la primera letra en minúscula y luego en mayúscula para garantizar consistencia
+            plataforma_name = plataforma_name.lower().capitalize()
+
+            try:
+                # Obtenemos todos los juegos cuyas plataformas comiencen con el nombre proporcionado
+                juegos = Juegos.objects.filter(plataformasjuegos__nombre__icontains=plataforma_name)
+
+                # Creación del array para almacenar los datos de los juegos
+                array = []
+
+                # Guardamos los datos de los juegos en el array
+                for juego in juegos:
+                    diccionario = {
+                        'id': juego.id,
+                        'nombre': juego.nombre,
+                        'genero': juego.genero,
+                        'fechaSalida': juego.fechasalida,
+                        'consola': juego.consola,
+                        'descripcion': juego.descripcion,
+                        'urlImagen': juego.urlimagen,
+                        'compañia': juego.compañia,
+                        'valoracion': juego.valoracion,
+                        'precio': juego.precio,
+                        'rebaja': juego.rebaja,
+                        'comentarioId': juego.comentarioid.id
+                    }
+                    array.append(diccionario)
+
+                # Devolvemos los datos de los juegos en formato JSON
+                return JsonResponse(array, safe=False)
+            
+            except Juegos.DoesNotExist:
+                # Si no se encuentran juegos para la plataforma, devolver un mensaje de error
+                return JsonResponse({'error': 'No hay juegos asociados a la plataforma proporcionada'}, status=404)
+            except Exception as e:
+                # Manejar cualquier otra excepción que pueda ocurrir
+                return JsonResponse({'error': str(e)}, status=500)
+        else:
+            # Si no se proporcionó el nombre de la plataforma en los parámetros de consulta, devolver un mensaje de error
+            return JsonResponse({'error': 'Nombre de plataforma de juegos no proporcionado en la URL'}, status=400)
