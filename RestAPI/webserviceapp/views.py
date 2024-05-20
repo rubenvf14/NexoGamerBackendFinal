@@ -36,3 +36,28 @@ def devolver_usuarios(request):
         return JsonResponse(array, safe = False)
     else:
         return JsonResponse("Method not allowed")
+
+#En esta función, simplemente cogeremos todos los datos de la tabla juegos y los imprimiremos por pantalla
+def devolver_juegos(request):
+    if request.method == 'GET':
+        juegos =Juegos.objects.all()
+        array = []
+        for juego in juegos:
+            diccionario = {
+                'id': juego.id,
+                'nombre': juego.nombre,
+                'genero': juego.genero,
+                'fechaSalida': juego.fechasalida,
+                'consola': juego.consola,
+                'descripcion': juego.descripcion,
+                'urlImagen': juego.urlimagen,
+                'compañia': juego.compañia,
+                'valoracion': juego.valoracion,
+                'precio': juego.precio,
+                'rebaja': juego.rebaja,
+                'comentarioId': juego.comentarioid.id
+            }
+            array.append(diccionario)
+        return JsonResponse(array, safe = False)
+    else:
+        return JsonResponse("Method not allowed")
