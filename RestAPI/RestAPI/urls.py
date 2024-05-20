@@ -30,4 +30,5 @@ urlpatterns = [
     path('favoritos/<int:usuario_id>', views.devolver_juegos_favoritos),
     path('register', views.register),
     path('del_user/<int:usuario_id>', views.del_user),
+    path('update_user/<int:usuario_id>', views.update_user),
 ]
