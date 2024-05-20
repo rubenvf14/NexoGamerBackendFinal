@@ -419,3 +419,28 @@ def logout(request, usuario_id):
 		return JsonResponse({'error': 'Faltan parametros o son incorrectos'}, status=400)
 	except Exception as e:
 		return JsonResponse({'error':'Unauthorized'},status=401)
+
+#Put Favoritos
+@csrf_exempt
+def put_favoritos(request, favorito_id):
+    if request.method == 'PUT':
+        session_token = request.headers.get('SesionToken')
+        usuario = Users.objects.filter(sessiontoken=session_token).first()
+        if not usuario:
+            # Si el usuario no está autenticado, devolver un error de autorización
+            return JsonResponse({'error': 'Unauthorized'}, status=401)
+        try:
+            favoritos = Favoritos.objects.get(pk=favorito_id)
+            data = json.loads(request.body)
+            favoritos.esfavorito = data.get('Favorita?', favoritos.esfavorito)
+            favoritos.save()
+            if favoritos.esfavorito == 1:
+                return JsonResponse({'message': 'Puesta como favorita'}, status=200)
+            else:
+                return JsonResponse({'message': 'Retirada de favoritos'}, status=200)
+        except Favoritos.DoesNotExist:
+            return JsonResponse({'error': 'Fav no encontrada'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+    else:
+        return JsonResponse({'error': 'Method Not Allowed'}, status=405)

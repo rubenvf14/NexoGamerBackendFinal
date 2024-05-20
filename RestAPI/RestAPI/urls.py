@@ -33,4 +33,5 @@ urlpatterns = [
     path('update_user/<int:usuario_id>', views.update_user),
     path('login', views.login),
     path('logout/<int:usuario_id>', views.logout),
+    path('put_favoritos/<int:favorito_id>', views.put_favoritos),
 ]
