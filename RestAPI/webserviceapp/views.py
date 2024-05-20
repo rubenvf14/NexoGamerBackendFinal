@@ -203,3 +203,50 @@ def devolver_juegos_PorNombre(request):
         else:
             # Si no se proporcionó el nombre de la plataforma en los parámetros de consulta, devolver un mensaje de error
             return JsonResponse({'error': 'Nombre del juego no proporcionado en la URL'}, status=400)
+
+def devolver_juegos_PorAño(request):
+    if request.method == 'GET':
+        #Introduciremos el año después de la palabra "año" localizada en la URL del buscador y convertimos la primera letra a mayúscula
+        juego_year = int(request.GET.get('año'))      
+
+        #Validamos que el año esté entre el 2000 y el 2024
+        if juego_year >= 2000 and juego_year <= 2024:
+
+        #Si existe el nombre del juego
+            if juego_year:
+                try:
+                    #Cogemos todos los datos de la tabla juegos
+                    juegos = Juegos.objects.all()
+
+                    #Creación del array
+                    array = []
+
+                    #Guardamos los datos con un bucle
+                    for juego in juegos:
+                        if juego.fechasalida >= juego_year:
+                            diccionario = {
+                                'id': juego.id,
+                                'nombre': juego.nombre,
+                                'genero': juego.genero,
+                                'fechaSalida': juego.fechasalida,
+                                'consola': juego.consola,
+                                'descripcion': juego.descripcion,
+                                'urlImagen': juego.urlimagen,
+                                'compañia': juego.compañia,
+                                'valoracion': juego.valoracion,
+                                'precio': juego.precio,
+                                'rebaja': juego.rebaja,
+                                'comentarioId': juego.comentarioid.id
+                            }
+                            array.append(diccionario) 
+
+                    return JsonResponse(array, safe = False)   
+
+                except Exception as e:
+                     #Manejar cualquier otra excepción que pueda ocurrir
+                   return JsonResponse({'error': str(e)}, status=500)
+            else:
+                # Si no se proporcionó el nombre de la plataforma en los parámetros de consulta, devolver un mensaje de error
+                return JsonResponse({'error': 'Fecha del juego no proporcionada en la URL'}, status=400)
+        else:
+            return JsonResponse({'error': 'The year must be between 2000 and 2024'}, status=400)
