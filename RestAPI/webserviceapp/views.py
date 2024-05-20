@@ -30,10 +30,7 @@ def devolver_usuarios(request):
                 'apellidos': usuario.apellidos,
                 'contraseña': usuario.contraseña,
                 'telefono': usuario.telefono,
-                'email': usuario.email,
-                'juegoFavoritoId': usuario.juegofavoritoid.id,
-                'comentarioJuegoId': usuario.comentariojuegoid.id,
-                'sessionToken': usuario.sessiontoken
+                'email': usuario.email
             }
             array.append(diccionario)
         return JsonResponse(array, safe = False)
@@ -77,7 +74,7 @@ def devolver_juegos_PorNombrePlataforma(request):
 
             try:
                 # Obtenemos todos los juegos cuyas plataformas comiencen con el nombre proporcionado
-                juegos = Juegos.objects.filter(plataformasjuegos__nombre__startswith=plataforma_name)
+                juegos = Juegos.objects.filter(plataformasjuegos__nombre__icontains=plataforma_name)
 
                 # Creación del array para almacenar los datos de los juegos
                 array = []
@@ -122,7 +119,7 @@ def devolver_juegos_PorGenero(request):
           if genero_name:
                try:
                     #Filtramos la tabla por el género que haya introducido el usuario
-                    juegos = Juegos.objects.filter(genero__startswith = genero_name)
+                    juegos = Juegos.objects.filter(genero__icontains = genero_name)
 
                     #Creación del array
                     array = []
@@ -167,7 +164,7 @@ def devolver_juegos_PorNombre(request):
         if juego_name:
             try:
                 #Filtramos la tabla por el nombre del juego que haya introducido el usuario o buscamos el alias del juego
-                juegos = Juegos.objects.filter(Q(nombre__startswith = juego_name) | Q(alias__icontains=juego_name.lower()))
+                juegos = Juegos.objects.filter(Q(nombre__icontains = juego_name) | Q(alias__icontains=juego_name.lower()))
 
                 #Creación del array
                 array = []
