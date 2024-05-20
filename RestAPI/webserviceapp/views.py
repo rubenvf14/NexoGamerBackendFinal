@@ -1,5 +1,7 @@
 import datetime
 from django.core import serializers
+from datetime import datetime, timedelta
+from django.conf import settings
 from django.db.models import Q
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
@@ -385,8 +387,8 @@ def login(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body.decode('utf-8'))
-            user = Users.objects.get(nombre=data['nombre'])
-            if check_password(data['contraseña'], user.contraseña):
+            user = Users.objects.get(nombre=data['username'])
+            if check_password(data['password'], user.contraseña):
                 token = crear_token(user.id)
                 sessiontoken = crear_token(user.id)
                 user.sessiontoken = sessiontoken
@@ -401,11 +403,6 @@ def login(request):
 
 @csrf_exempt
 def logout(request, usuario_id):
-    # Comprobación de token. El error_response guarda la información que le proporciona el return del verify_token
-	error_response, payload = verify_token(request)
-	#Si existe el error se visualizará por pantalla
-	if error_response:
-		return error_response
 
 	#Si el método introducido no es un PATCH, saltará el error
 	if request.method != 'PATCH':
