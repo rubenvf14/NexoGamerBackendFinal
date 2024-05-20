@@ -109,3 +109,48 @@ def devolver_juegos_PorNombrePlataforma(request):
         else:
             # Si no se proporcionó el nombre de la plataforma en los parámetros de consulta, devolver un mensaje de error
             return JsonResponse({'error': 'Nombre de plataforma de juegos no proporcionado en la URL'}, status=400)
+
+def devolver_juegos_PorGenero(request):
+     if request.method == 'GET':
+          #Introduciremos el género después de la palabra "genero" localizada en la URL del buscador y convertimos la primera letra a mayúscula
+          genero_name = request.GET.get('genero').capitalize()
+          
+          #Si existe el nombre del genero
+          if genero_name:
+               try:
+                    #Filtramos la tabla por el género que haya introducido el usuario
+                    juegos = Juegos.objects.filter(genero__icontains = genero_name)
+
+                    #Creación del array
+                    array = []
+
+                    #Guardamos los datos con un bucle
+                    for juego in juegos:
+                        diccionario = {
+                            'id': juego.id,
+                            'nombre': juego.nombre,
+                            'genero': juego.genero,
+                            'fechaSalida': juego.fechasalida,
+                            'consola': juego.consola,
+                            'descripcion': juego.descripcion,
+                            'urlImagen': juego.urlimagen,
+                            'compañia': juego.compañia,
+                            'valoracion': juego.valoracion,
+                            'precio': juego.precio,
+                            'rebaja': juego.rebaja,
+                            'comentarioId': juego.comentarioid.id
+                        }
+                        array.append(diccionario)
+                    
+                    #Devolvemos el resultado en formato de objeto
+                    return JsonResponse(array, safe = False)
+
+               except Juegos.DoesNotExist:
+                # Si no se encuentra el juego, devolver un mensaje de error
+                    return JsonResponse({'error': 'Juego no encontrado'}, status=404)
+               except Exception as e:
+                # Manejar cualquier otra excepción que pueda ocurrir
+                return JsonResponse({'error': str(e)}, status=500)
+     else:
+            # Si no se proporcionó el nombre de la plataforma en los parámetros de consulta, devolver un mensaje de error
+        return JsonResponse({'error': 'Género del juego no proporcionado en la URL'}, status=400)
