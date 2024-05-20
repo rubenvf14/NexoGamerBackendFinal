@@ -1,7 +1,5 @@
 import datetime
 from django.core import serializers
-from datetime import datetime, timedelta
-from django.conf import settings
 from django.db.models import Q
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
@@ -32,7 +30,10 @@ def devolver_usuarios(request):
                 'apellidos': usuario.apellidos,
                 'contraseña': usuario.contraseña,
                 'telefono': usuario.telefono,
-                'email': usuario.email
+                'email': usuario.email,
+                'juegoFavoritoId': usuario.juegofavoritoid.id,
+                'comentarioJuegoId': usuario.comentariojuegoid.id,
+                'sessionToken': usuario.sessiontoken
             }
             array.append(diccionario)
         return JsonResponse(array, safe = False)
@@ -76,7 +77,6 @@ def devolver_juegos_PorNombrePlataforma(request):
 
             try:
                 # Obtenemos todos los juegos cuyas plataformas comiencen con el nombre proporcionado
-                juegos = Juegos.objects.filter(plataformasjuegos__nombre__icontains=plataforma_name)
                 juegos = Juegos.objects.filter(plataformasjuegos__nombre__icontains=plataforma_name)
 
                 # Creación del array para almacenar los datos de los juegos
@@ -123,7 +123,6 @@ def devolver_juegos_PorGenero(request):
                try:
                     #Filtramos la tabla por el género que haya introducido el usuario
                     juegos = Juegos.objects.filter(genero__icontains = genero_name)
-                    juegos = Juegos.objects.filter(genero__icontains = genero_name)
 
                     #Creación del array
                     array = []
@@ -168,7 +167,6 @@ def devolver_juegos_PorNombre(request):
         if juego_name:
             try:
                 #Filtramos la tabla por el nombre del juego que haya introducido el usuario o buscamos el alias del juego
-                juegos = Juegos.objects.filter(Q(nombre__icontains = juego_name) | Q(alias__icontains=juego_name.lower()))
                 juegos = Juegos.objects.filter(Q(nombre__icontains = juego_name) | Q(alias__icontains=juego_name.lower()))
 
                 #Creación del array
@@ -293,6 +291,7 @@ def devolver_juegos_favoritos(request, usuario_id):
     # Si el método no es GET, devuelve un error de método no permitido
     return JsonResponse({'error': 'Method not allowed'}, status=405)
 
+@csrf_exempt
 def register(request):
     if request.method == 'POST':
         try:
@@ -373,25 +372,54 @@ def update_user(request, usuario_id):
     else:
         return JsonResponse({'error': 'Método no permitido'}, status=405)
 
-def crear_token(user_id):
-    payload = {
-        'user_id': user_id,
-        'exp': datetime.utcnow() + timedelta(hours=24),
-        'iat': datetime.utcnow()
-    }
-    token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
-    return token
+SECRET_KEY = 'claveTremendamentesegura.'
+
+def crear_token(usuario_id):
+	payload = {
+		'id': usuario_id,
+		'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1),
+		'iat': datetime.datetime.utcnow()
+	}
+	token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
+	return token
+
+"""
+    Verifica un token JWT incluido en la solicitud HTTP.
+
+    Returns:
+      		Una tupla con dos elementos:
+            - JsonResponse o None: Si hay un error, devuelve una respuesta JSON con un mensaje de error.
+            - dict or None: Si el token es válido, devuelve el payload decodificado.
+"""
+
+def verify_token(request):
+	token = request.META.get('HTTP_AUTHORIZATION',None)
+	if not token:
+		return JsonResponse({'message':'Token is missing!'}, status=401), None
+
+	try:
+		if token.startswith('Bearer '):
+			token = token.split(' ')[1]
+		payload = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
+		return None, payload
+	except jwt.ExpiredSignatureError:
+		return JsonResponse({'message':'Token has expired'}, status=401), None
+	except jwt.InvalidTokenError:
+		return JsonResponse({'message':'Invalid token!'}, status=401), None
+
+# login
+# cuando inicias sesion la primera vez lo hace perfectamente y cuando cierras tambien lo hace correctamente pero cuando inicias sesion por segunda vez te sale el error de contraseña incorrecta aún poniendo la contraseña bien
 
 @csrf_exempt
 def login(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body.decode('utf-8'))
-            user = Users.objects.get(nombre=data['username'])
-            if check_password(data['password'], user.contraseña):
+            user = Users.objects.get(nombre=data['nombre'])
+            if check_password(data['contraseña'], user.contraseña):
                 token = crear_token(user.id)
-                sessiontoken = crear_token(user.id)
-                user.sessiontoken = sessiontoken
+                sessiontoken=crear_token(user.id)
+                user.sessiontoken=sessiontoken
                 user.save()
                 return JsonResponse({'iduser': user.id, 'token': token}, status=200)
             else:
@@ -403,6 +431,11 @@ def login(request):
 
 @csrf_exempt
 def logout(request, usuario_id):
+    # Comprobación de token. El error_response guarda la información que le proporciona el return del verify_token
+	error_response, payload = verify_token(request)
+	#Si existe el error se visualizará por pantalla
+	if error_response:
+		return error_response
 
 	#Si el método introducido no es un PATCH, saltará el error
 	if request.method != 'PATCH':
