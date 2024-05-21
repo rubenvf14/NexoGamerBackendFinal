@@ -173,7 +173,7 @@ https://github.com/rubenvf14/NexoGamerFrontendFinal/assets/145007165/89b89c4b-91
 
 </div>
 
-<p>Finalmente te dirigirás al directorio "src", situado dentro de la carpeta "frontend", y ejecutarás el comando npm start. En mi caso lo he realizado desde visual studio code, pero se puede hacer también desde la terminal de Windows como en el vídeo de arriba.</p>
+<p>Finalmente te dirigirás al directorio "src", situado dentro de la carpeta "frontend", y ejecutarás los comandos npm install y acto seguido npm start. En mi caso lo he realizado desde visual studio code, pero se puede hacer también desde la terminal de Windows como en el vídeo de arriba.</p>
 
 <div>
   
@@ -200,4 +200,4 @@ https://github.com/rubenvf14/NexoGamerFrontendFinal/assets/145007165/8f13af8f-ec
 
 ## <h1> 🤔 Conclusión</h1>
 <p>En resumen, ¿por qué deberías visitar NexoGamer? Porque en nuestra página ofreceremos descuentos increíbles para juegos que nunca te podrías imaginar, y si eres un jugador al que le encantan los videojuegos siempre nos tendrás en cuenta para tus próximos títulos.
-</p>
+</p>](https://gitlab.com/rubenvarelafigueroa/NexoGamerDefinitivo)
