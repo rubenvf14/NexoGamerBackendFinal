@@ -191,6 +191,7 @@ https://github.com/rubenvf14/NexoGamerFrontendFinal/assets/145007165/8f13af8f-ec
   <li>Django</li>
   <li>JavaScript</li>
   <li>Python</li>
+  <li>Node js</li>
   <li>HTML</li>
   <li>CSS</li>
 </ul>
