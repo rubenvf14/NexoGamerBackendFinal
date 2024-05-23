@@ -348,9 +348,18 @@ def update_user(request, usuario_id):
             # Decodificar y obtener los datos de la solicitud
             data = json.loads(request.body.decode('utf-8'))
 
-            # Actualizar los campos del usuario si existen en los datos
+            # Verificar si el nombre o email ya existen
             if 'nombre' in data:
+                if Users.objects.filter(nombre=data['nombre']).exclude(id=usuario_id).exists():
+                    return JsonResponse({'error': 'El nombre de usuario ya existe'}, status=400)
                 usuario.nombre = data['nombre']
+                
+            if 'email' in data:
+                if Users.objects.filter(email=data['email']).exclude(id=usuario_id).exists():
+                    return JsonResponse({'error': 'El email ya está en uso'}, status=400)
+                usuario.email = data['email']
+
+            # Actualizar los campos restantes si existen en los datos
             if 'apellidos' in data:
                 usuario.apellidos = data['apellidos']
             if 'contraseña' in data:
@@ -358,8 +367,6 @@ def update_user(request, usuario_id):
                 usuario.contraseña = make_password(data['contraseña'])
             if 'telefono' in data:
                 usuario.telefono = data['telefono']
-            if 'email' in data:
-                usuario.email = data['email']
 
             # Guardar los cambios
             usuario.save()
