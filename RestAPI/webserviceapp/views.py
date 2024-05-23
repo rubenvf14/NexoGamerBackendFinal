@@ -362,9 +362,15 @@ def update_user(request, usuario_id):
             # Actualizar los campos restantes si existen en los datos
             if 'apellidos' in data:
                 usuario.apellidos = data['apellidos']
+                
             if 'contraseña' in data:
-                # Hashear la contraseña antes de guardarla
-                usuario.contraseña = make_password(data['contraseña'])
+                # Verificar si la contraseña está presente y no es nula
+                if data['contraseña'] is not None and data['contraseña'] != "":
+                    # Hashear la contraseña antes de guardarla
+                    usuario.contraseña = make_password(data['contraseña'])
+                else:
+                    return JsonResponse({'error': 'La contraseña no puede ser nula'}, status=400)
+                
             if 'telefono' in data:
                 usuario.telefono = data['telefono']
 
