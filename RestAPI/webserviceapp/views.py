@@ -301,7 +301,11 @@ def register(request):
             required_fields = ['nombre', 'apellidos', 'contraseña', 'telefono', 'email']
             for field in required_fields:
                 if field not in data:
-                    return JsonResponse({'error': 'Faltan parámetros en la solicitud'}, status=400)
+                    return JsonResponse({'error': f'Falta el parámetro {field} en la solicitud'}, status=400)
+
+            # Verificar si los campos 'nombre' y 'contraseña' no son nulos o vacíos
+            if not data['nombre'] or not data['contraseña']:
+                return JsonResponse({'error': 'El nombre y la contraseña no pueden ser nulos o vacíos'}, status=400)
 
             # Verificar si ya existe un usuario con el mismo nombre o email
             if Users.objects.filter(nombre=data['nombre']).exists() or Users.objects.filter(email=data['email']).exists():
@@ -317,8 +321,12 @@ def register(request):
             )
             new_user.save()
             return JsonResponse({'message': 'Usuario registrado exitosamente'}, status=201)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Error al procesar la solicitud. JSON inválido.'}, status=400)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
+    else:
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
 
 @csrf_exempt
 def del_user(request, usuario_id):
