@@ -15,6 +15,7 @@ from django.contrib.auth.hashers import check_password
 import datetime
 from django.core.paginator import Paginator
 from django.views.decorators.http import require_POST
+from django.middleware.csrf import get_token
 
 # Create your views here.
 
@@ -396,40 +397,28 @@ def update_user(request, usuario_id):
 SECRET_KEY = 'claveTremendamentesegura.'
 
 def crear_token(usuario_id):
-	payload = {
-		'id': usuario_id,
-		'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1),
-		'iat': datetime.datetime.utcnow()
-	}
-	token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
-	return token
-
-"""
-    Verifica un token JWT incluido en la solicitud HTTP.
-
-    Returns:
-      		Una tupla con dos elementos:
-            - JsonResponse o None: Si hay un error, devuelve una respuesta JSON con un mensaje de error.
-            - dict or None: Si el token es válido, devuelve el payload decodificado.
-"""
+    payload = {
+        'id': usuario_id,
+        'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1),
+        'iat': datetime.datetime.utcnow()
+    }
+    token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
+    return token
 
 def verify_token(request):
-	token = request.META.get('HTTP_AUTHORIZATION',None)
-	if not token:
-		return JsonResponse({'message':'Token is missing!'}, status=401), None
+    token = request.META.get('HTTP_AUTHORIZATION', None)
+    if not token:
+        return JsonResponse({'message': 'Token is missing!'}, status=401), None
 
-	try:
-		if token.startswith('Bearer '):
-			token = token.split(' ')[1]
-		payload = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
-		return None, payload
-	except jwt.ExpiredSignatureError:
-		return JsonResponse({'message':'Token has expired'}, status=401), None
-	except jwt.InvalidTokenError:
-		return JsonResponse({'message':'Invalid token!'}, status=401), None
-
-# login
-# cuando inicias sesion la primera vez lo hace perfectamente y cuando cierras tambien lo hace correctamente pero cuando inicias sesion por segunda vez te sale el error de contraseña incorrecta aún poniendo la contraseña bien
+    try:
+        if token.startswith('Bearer '):
+            token = token.split(' ')[1]
+        payload = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
+        return None, payload
+    except jwt.ExpiredSignatureError:
+        return JsonResponse({'message': 'Token has expired'}, status=401), None
+    except jwt.InvalidTokenError:
+        return JsonResponse({'message': 'Invalid token!'}, status=401), None
 
 @csrf_exempt
 def login(request):
@@ -439,8 +428,8 @@ def login(request):
             user = Users.objects.get(nombre=data['nombre'])
             if check_password(data['contraseña'], user.contraseña):
                 token = crear_token(user.id)
-                sessiontoken=crear_token(user.id)
-                user.sessiontoken=sessiontoken
+                sessiontoken = crear_token(user.id)
+                user.sessiontoken = sessiontoken
                 user.save()
                 return JsonResponse({'iduser': user.id, 'token': token}, status=200)
             else:
@@ -474,31 +463,61 @@ def logout(request, usuario_id):
 	except Exception as e:
 		return JsonResponse({'error':'Unauthorized'},status=401)
 
-#Put Favoritos
+#put_favoritos
 @csrf_exempt
-def put_favoritos(request, favorito_id):
+def put_favoritos(request, juego_id):
     if request.method == 'PUT':
-        session_token = request.headers.get('SesionToken')
+        session_token = request.headers.get('SessionToken')
         usuario = Users.objects.filter(sessiontoken=session_token).first()
         if not usuario:
             # Si el usuario no está autenticado, devolver un error de autorización
             return JsonResponse({'error': 'Unauthorized'}, status=401)
-        try:
-            favoritos = Favoritos.objects.get(pk=favorito_id)
-            data = json.loads(request.body)
-            favoritos.esfavorito = data.get('Favorita?', favoritos.esfavorito)
-            favoritos.save()
-            if favoritos.esfavorito == 1:
-                return JsonResponse({'message': 'Puesta como favorita'}, status=200)
-            else:
-                return JsonResponse({'message': 'Retirada de favoritos'}, status=200)
-        except Favoritos.DoesNotExist:
-            return JsonResponse({'error': 'Fav no encontrada'}, status=404)
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=400)
+
+        data = json.loads(request.body)
+        user_id = data.get('userId')
+        es_favorito = data.get('esFavorito')
+
+        # Verificar si esFavorito es None o no
+        if es_favorito is None:
+            return JsonResponse({'error': 'esFavorito cannot be None'}, status=400)
+
+        # Buscar la instancia de Juegos correspondiente al juego_id
+        juego = Juegos.objects.get(id=juego_id)
+
+        # Buscar la instancia de Users correspondiente al user_id
+        user = Users.objects.get(id=user_id)
+
+        # Verificar si ya existe una entrada para este juego y usuario en Favoritos
+        favorito, created = Favoritos.objects.get_or_create(juegoid=juego, userid=user)
+
+        # Actualizar el campo esFavorito según la solicitud
+        favorito.esfavorito = es_favorito
+        favorito.save()
+
+        # Devolver un mensaje de éxito
+        if es_favorito:
+            message = 'Añadido a favoritos'
+        else:
+            message = 'Eliminado de favoritos'
+
+        # Configurar las cabeceras CORS permitidas
+        response = JsonResponse({'message': message}, status=200)
+        response['Access-Control-Allow-Origin'] = 'http://localhost:3000'
+        response['Access-Control-Allow-Methods'] = 'PUT'
+        response['Access-Control-Allow-Headers'] = 'Content-Type, SessionToken'
+        return response
+
+    elif request.method == 'OPTIONS':
+        # Respuesta a las solicitudes OPTIONS con los encabezados CORS permitidos
+        response = JsonResponse({'message': 'Preflight request approved'}, status=200)
+        response['Access-Control-Allow-Origin'] = 'http://localhost:3000'
+        response['Access-Control-Allow-Methods'] = 'PUT'
+        response['Access-Control-Allow-Headers'] = 'Content-Type, SessionToken'
+        return response
+
     else:
         return JsonResponse({'error': 'Method Not Allowed'}, status=405)
-
+    
 def obtener_comentarios_juegos(request):
     # Obtener todos los juegos con sus comentarios asociados
     juegos_con_comentarios = Juegos.objects.select_related('comentarioid').all()

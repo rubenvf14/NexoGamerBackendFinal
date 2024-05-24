@@ -41,11 +41,19 @@ class Juegos(models.Model):
     precio = models.DecimalField(max_digits=4, decimal_places=2, blank=True, null=True)
     rebaja = models.IntegerField(blank=True, null=True)
     comentarioid = models.ForeignKey(Comentariosjuegos, models.DO_NOTHING, db_column='comentarioId', blank=True, null=True)  # Field name made lowercase.
-    plataforma = models.CharField(max_length=100, blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = 'juegos'
+
+
+class Plataformasjuegos(models.Model):
+    nombre = models.CharField(max_length=100, blank=True, null=True)
+    juegoid = models.ForeignKey(Juegos, models.DO_NOTHING, db_column='juegoId', blank=True, null=True)  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'plataformasJuegos'
 
 
 class Users(models.Model):
