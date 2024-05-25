@@ -8,6 +8,7 @@ from .models import Users
 from .models import Juegos
 from .models import Comentariosjuegos
 from .models import Favoritos
+from .models import Plataformasjuegos
 import json, jwt
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import make_password
@@ -161,20 +162,23 @@ def devolver_juegos_PorGenero(request):
 
 def devolver_juegos_PorNombre(request):
     if request.method == 'GET':
-        #Introduciremos el género después de la palabra "genero" localizada en la URL del buscador y convertimos la primera letra a mayúscula
+        # Introducimos el nombre después de la palabra "nombre" localizada en la URL del buscador y convertimos la primera letra a mayúscula
         juego_name = request.GET.get('nombre').capitalize()
     
-    #Si existe el nombre del juego
+        # Si existe el nombre del juego
         if juego_name:
             try:
-                #Filtramos la tabla por el nombre del juego que haya introducido el usuario o buscamos el alias del juego
-                juegos = Juegos.objects.filter(Q(nombre__icontains = juego_name) | Q(alias__icontains=juego_name.lower()))
+                # Filtramos la tabla por el nombre del juego que haya introducido el usuario o buscamos el alias del juego
+                juegos = Juegos.objects.filter(Q(nombre__icontains=juego_name) | Q(alias__icontains=juego_name.lower()))
 
-                #Creación del array
+                # Creación del array
                 array = []
 
-                #Guardamos los datos con un bucle
+                # Guardamos los datos con un bucle
                 for juego in juegos:
+                    # Obtener las plataformas asociadas al juego
+                    plataformas = Plataformasjuegos.objects.filter(juegoid=juego.id).values_list('nombre', flat=True)
+                    
                     diccionario = {
                         'id': juego.id,
                         'nombre': juego.nombre,
@@ -188,16 +192,17 @@ def devolver_juegos_PorNombre(request):
                         'precio': juego.precio,
                         'rebaja': juego.rebaja,
                         'comentarioId': juego.comentarioid.id,
-                        'plataforma': juego.plataforma
+                        'plataformas': list(plataformas)  # Convertir el queryset en una lista
                     }
 
                     # Verificar si el juego tiene un alias
                     if juego.alias:
                         # Si tiene alias, agregamos el campo 'alias' al diccionario
                         diccionario['alias'] = juego.alias
+                    
                     array.append(diccionario)
                 
-                return JsonResponse(array, safe = False)
+                return JsonResponse(array, safe=False)
 
             except Juegos.DoesNotExist:
                 # Si no se encuentra el juego, devolver un mensaje de error
@@ -206,7 +211,7 @@ def devolver_juegos_PorNombre(request):
                 # Manejar cualquier otra excepción que pueda ocurrir
                 return JsonResponse({'error': str(e)}, status=500)
         else:
-            # Si no se proporcionó el nombre de la plataforma en los parámetros de consulta, devolver un mensaje de error
+            # Si no se proporcionó el nombre del juego en los parámetros de consulta, devolver un mensaje de error
             return JsonResponse({'error': 'Nombre del juego no proporcionado en la URL'}, status=400)
 
 def devolver_juegos_PorAño(request):
