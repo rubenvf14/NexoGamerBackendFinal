@@ -9,6 +9,7 @@ from .models import Juegos
 from .models import Comentariosjuegos
 from .models import Favoritos
 from .models import Plataformasjuegos
+from .models import Carrito
 import json, jwt
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import make_password
@@ -559,6 +560,57 @@ def agregarComentario(request):
             nuevo_comentario.save()
             
             return JsonResponse({'message': 'Comentario agregado exitosamente'}, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    else:
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+@csrf_exempt
+def agregar_al_carrito(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            juego_id = data['juegoId']
+            user_id = data['userId']
+            cantidad = data['cantidad']
+            
+            # Añade la cantidad de un juego al carrito
+            nueva_cantidad = Carrito(
+                juegoid_id=juego_id,
+                userid_id=user_id,
+                cantidad=cantidad,
+            )
+            nueva_cantidad.save()
+            
+            return JsonResponse({'message': 'Juego agregado al carrito existosamente'}, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    else:
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+    
+@csrf_exempt
+def ver_carrito(request, user_id):
+    if request.method == 'GET':
+        try:
+            items_carrito = Carrito.objects.filter(userid_id=user_id)
+            juegos_carrito = []
+            for item in items_carrito:
+                juego = Juegos.objects.get(id=item.juegoid_id)
+                juegos_carrito.append({
+                    'juegoId': juego.id,
+                    'nombre': juego.nombre,
+                    'genero': juego.genero,
+                    'fechaSalida': juego.fechasalida,
+                    'consola': juego.consola,
+                    'urlImagen': juego.urlimagen,
+                    'compañia': juego.compañia,
+                    'valoracion': juego.valoracion,
+                    'precio': juego.precio,
+                    'rebaja': juego.rebaja,
+                    'comentarioId': juego.comentarioid.id,
+                    'cantidad': item.cantidad,
+                })
+            return JsonResponse(juegos_carrito, safe=False, status=200)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
     else:

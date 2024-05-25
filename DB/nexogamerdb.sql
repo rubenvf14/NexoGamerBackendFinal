@@ -55,6 +55,14 @@ CREATE TABLE plataformasJuegos(
     juegoId INT /*Clave foránea*/
 );
 
+-- Creación de la tabla Carrito que almacenará todos los juegos del carrito de la compra del usuario
+CREATE TABLE carrito (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    juegoId INT, /* Clave foránea */
+    userId INT, /* Clave foránea */
+    cantidad INT
+);
+
 -- Inserciones de la tabla users
 INSERT INTO users (nombre, apellidos, contraseña, telefono, email, juegoFavoritoId, comentarioJuegoId) VALUES
 ('John', 'Doe', 'Contraseña123', '123456789', 'john.doe@email.com', 1, 1),
@@ -128,6 +136,10 @@ INSERT INTO plataformasJuegos (nombre, juegoId) VALUES
 ('Steam', 11),
 ('Steam', 12);
 
+-- Inserciones de la tabla carrito
+INSERT INTO carrito (juegoId, userId, cantidad) VALUES 
+(1,1,1);
+
 /*Ahora añadimos todas las claves foráneas correspondientes para el proyecto de NexoGamer*/
 
 /*USERS*/
@@ -147,3 +159,7 @@ ALTER TABLE favoritos ADD FOREIGN KEY (userId) REFERENCES users(id);
 
 /*PLATAFORMAS JUEGOS*/
 ALTER TABLE plataformasJuegos ADD FOREIGN KEY (juegoId) REFERENCES juegos(id);
+
+/*CARRITO*/
+ALTER TABLE carrito ADD FOREIGN KEY (juegoId) REFERENCES juegos(id);
+ALTER TABLE carrito ADD FOREIGN KEY (userId) REFERENCES users(id);

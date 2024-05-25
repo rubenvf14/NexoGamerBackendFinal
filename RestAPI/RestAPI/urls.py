@@ -36,4 +36,6 @@ urlpatterns = [
     path('putFavoritos/<int:juego_id>', views.put_favoritos),
     path('comentariosJuegos', views.obtener_comentarios_juegos),
     path('agregarComentario', views.agregarComentario),
+    path('agregarCarrito', views.agregar_al_carrito),
+    path('carrito/<int:user_id>', views.ver_carrito)
 ]
