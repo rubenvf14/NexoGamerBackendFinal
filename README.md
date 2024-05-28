@@ -93,7 +93,7 @@ https://github.com/rubenvf14/NexoGamerFrontendFinal/assets/145007165/376845e6-53
 
 <ul>
   <li>Backend: https://github.com/rubenvf14/NexoGamerBackendFinal</li>
-  <li>Frontend: https://github.com/rubenvf14/NexoGamerFrontendFinal</li>
+  <li>Frontend: https://gitlab.com/rubenvarelafigueroa/NexoGamerDefinitivo</li>
 </ul>
 
 <p>Una vez entres a cada link aparecerá una opción llamada "<> Code" en verde, entonces deberás clicar en ella y copiar al portapapeles el contenido</p>
@@ -202,4 +202,4 @@ https://github.com/rubenvf14/NexoGamerFrontendFinal/assets/145007165/8f13af8f-ec
 
 ## <h1> 🤔 Conclusión</h1>
 <p>En resumen, ¿por qué deberías visitar NexoGamer? Porque en nuestra página ofreceremos descuentos increíbles para juegos que nunca te podrías imaginar, y si eres un jugador al que le encantan los videojuegos siempre nos tendrás en cuenta para tus próximos títulos.
-</p>](https://gitlab.com/rubenvarelafigueroa/NexoGamerDefinitivo)
+</p>
