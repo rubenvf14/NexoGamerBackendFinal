@@ -87,7 +87,7 @@ https://github.com/rubenvf14/NexoGamerFrontendFinal/assets/145007165/376845e6-53
 
 ## 📁 Acceso al proyecto
 
-<p>Para poder iniciar el proyecto "NexoGamer", es necesario descargar tanto el backend como el frontend. ¿Qué quiere decir esto? Pues que se debe descargar tanto el servidor como la página web para poder trabajar con ella correctamente. ¿Y en qué orden debo hacerlo? Pues en primer lugar el backend, para que pueda cargar todo el contenido correctamente el frontend posteriormente, y finalmente el frontend.</p>
+<p>Para poder iniciar el proyecto "NexoGamer", es necesario descargar tanto el backend como el frontend. ¿Qué quiere decir esto? Pues que se debe descargar tanto el servidor como la página web para poder trabajar con ella correctamente. ¿Y en qué orden debo hacerlo? Pues en primer lugar el backend, para que pueda cargar todo el contenido correctamente el frontend posteriormente, y finalmente el frontend. Además, se deberá tener la clave pública activada tanto en GitHub como en GitLab para poder trabajar correctamente con los repositorios.</p>
 
 <p>Los links son estos 🔗</p>
 
@@ -108,6 +108,7 @@ deberás cambiarle el renvío de puertos en la configuración de la máquina vir
 ## <h1>⌨️ Comandos ⌨️</h1>
 <ul>
   <li>sudo apt update</li>
+  <li>sudo apt install git</li>
   <li>sudo apt install python3 python3-pip</li>
   <li>sudo apt install python3-virtualenv</li>
   <li>virtualenv django_pip</li>
