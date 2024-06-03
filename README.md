@@ -108,10 +108,28 @@ deberás cambiarle el renvío de puertos en la configuración de la máquina vir
 ## <h1>⌨️ Comandos ⌨️</h1>
 <ul>
   <li>sudo apt update</li>
+  <li>sudo apt upgrade</li>
   <li>sudo apt install git</li>
+  <li>sudo apt install python3</li>
   <li>sudo apt install python3 python3-pip</li>
   <li>sudo apt install python3-virtualenv</li>
+  <li>pip install django</li>
+  <li>pip install django-cors-headers</li>
+  <li>pip install PyJWT</li>
+  <li>sudo apt install mariadb-server</li>
   <li>virtualenv django_pip</li>
+</ul>
+
+<p>Además, después deberemos entrar a MariaDb y hacer los siguientes pasos. Para comenzar teclearemos el siguiente comando: sudo mysql -u root -p y cubriremos los campos que nos pida el sistema. A continuación, introduciremos este otro SOURCE /home/ruben/NexoGamerBackendFinal/DB/nexogamerdb.sql -> solo aplica en mi caso particular, ya que se deberá modificar la ruta en función del nombre del usuario de la máquina virtual y la ruta donde esté alojado el backend. Luego, se deberá introducir este otro comando: sudo mysqldump -u root -p nexogamerdb > /home/ruben/NexoGamerBackendFinal/DB/dump/nexogamerdb.sql. Finalmente deberás ejecutar el siguiente comando: python3 manage.py inspectdb > webserviceapp/models.py y para arrancar el servidor python3 manage.py runserver 0.0.0.0:8000</p>
+
+## <h1>❎ Errores :❎</h1>
+
+<p>Si te da errores relacionados con MariaDB prueba estos comandos: pip install mysqlclient y sudo apt install python3-django. Además, dentro de MariaDB ejecuta estes otros y luego vuelve a probar a iniciar el servidor: </p>
+
+<ul>
+  <li>GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' IDENTFIED BY '1234' WITH GRANT OPTION;</li>
+  <li>FLUSH PRIVILEGES;</li>
+  <li>EXIT;</li>
 </ul>
 
 <div>
